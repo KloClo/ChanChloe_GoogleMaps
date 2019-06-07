@@ -29,6 +29,7 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
@@ -318,8 +319,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             Geocoder geocoder = new Geocoder(this, Locale.US);
 
+            Log.d("MyMapsApp","onSearch: created a new Geocoder");
 
+            try{
+                addressList = geocoder.getFromLocationName(location,10000,
+                        userLocation.latitude - (5.0/60.0),
+                        userLocation.longitude - (5.0/60.0),
+                        userLocation.latitude + (5.0/60.0),
+                        userLocation.longitude + (5.0/60.0));
 
+                Log.d("MyMapsApp","onSearch: created addressList");
+
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+
+            if(!addressList.isEmpty()) {
+                Log.d("MyMapsApp","addressList size = " + addressList.size());
+                for(int i = 0; i < addressList.size();i++){
+                    Address address = addressList.get(i);
+                    LatLng latLng = new LatLng(address.getLatitude(),address.getLongitude());
+
+                    mMap.addMarker(new MarkerOptions().position(latLng).title(i+": "+
+                            address.getSubThoroughfare()+" "+address.getThoroughfare()));
+
+                    Log.d("MyMapsApp","onSearch: added Marker");
+
+                    mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+                }
+            }
         }
     }
 
